@@ -1,0 +1,32 @@
+{
+  "name": "tic-tac-server",
+  "version": "1.0.0",
+  "description": "A NodeJS WebSocket Tic Tac Toe Server",
+  "main": "index.mjs",
+  "engines": {
+    "node": "8.11.1"
+  },
+  "scripts": {
+    "client": "node --experimental-modules client.mjs",
+    "start": "node --experimental-modules index.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/supernova-at/tic-tac-server.git"
+  },
+  "keywords": [
+    "websockets"
+  ],
+  "author": "supernova-at (Andy Terranova)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/supernova-at/tic-tac-server/issues"
+  },
+  "homepage": "https://github.com/supernova-at/tic-tac-server#readme",
+  "dependencies": {
+    "bufferutil": "4.0.0",
+    "express": "4.16.3",
+    "utf-8-validate": "5.0.1",
+    "ws": "6.0.0"
+  }
+}
