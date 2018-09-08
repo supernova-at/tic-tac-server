@@ -7,7 +7,6 @@
     "node": "8.11.1"
   },
   "scripts": {
-    "client": "node --experimental-modules client.mjs",
     "start": "node --experimental-modules index.mjs"
   },
   "repository": {
