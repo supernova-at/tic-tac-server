@@ -26,6 +26,13 @@
       const host = location.origin.replace(/^http/, 'ws');
       const socket = new WebSocket(host);
 
+      socket.onopen = () => {
+        socket.send(JSON.stringify({
+          type: 'register',
+          name: 'viewer',
+        }));
+      }
+
       socket.onmessage = (event) => {
         console.log(`received ${event}.`);
         const p = document.createElement('p');
