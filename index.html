@@ -34,7 +34,7 @@
       }
 
       socket.onmessage = (event) => {
-        console.log(`received ${event}.`);
+        console.log(`Received ${event}.`);
         const p = document.createElement('p');
         p.innerText = event.data;
         $output.insertBefore(p, $output.firstChild);

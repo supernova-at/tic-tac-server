@@ -35,6 +35,7 @@ webSocketServer.on('connection', socket => {
 
   socket.on('message', data => {
     console.log(`Received a message: ${data}.`);
+    updateViewer();
 
     const playerMessage = JSON.parse(data);
     switch (playerMessage.type) {
@@ -60,9 +61,11 @@ webSocketServer.on('connection', socket => {
 });
 
 const updateViewer = () => {
-  viewerSocket.send(JSON.stringify({
-    some: 'thing'
-  }));
+  if (viewerSocket) {
+    viewerSocket.send(JSON.stringify({
+      numPlayers: players.length,
+    }));
+  }
 };
 
 // const promptForMove = socket => {
