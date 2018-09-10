@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Tic Tac Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <style>
+      #output {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+      }
+
+      #output p:nth-of-type(even) {
+        padding: 4px;
+        background-color: lightcyan;
+      }
+    </style>
+
+    <script>
+      const $output = document.getElementById('output');
+
+      const host = location.origin.replace(/^http/, 'ws');
+      const socket = new WebSocket(host);
+
+      socket.onmessage = (event) => {
+        console.log(`received ${event}.`);
+        const p = document.createElement('p');
+        p.innerText = event.data;
+        $output.insertBefore(p, $output.firstChild);
+      }
+    </script>
+  </head>
+  <body>
+    <h2>Received Messages</h2>
+    <div id="output" style="border: dashed 1px darkorange">
+    </div>
+  </body>
+</html>

@@ -1,40 +1,66 @@
 // Imports.
 import express from 'express';
 import http from 'http';
+import path from 'path';
 import ws from 'ws';
 
+import Game from './game.mjs';
+import Player from './player.mjs';
+
 // Members.
-const SocketServer = ws.Server;
 const PORT = process.env.PORT || 3000;
+const INDEX = path.join(__dirname, 'index.html');
+let game;
+let players;
 
 // Express Server.
 const server = express()
-  .use((req, res) => {
-    console.log('Sending greeting from Express.');
-    res.send({ hello: 'client' })
-  })
+  .use((request, response) => response.sendFile(INDEX))
+  .listen(PORT, () => console.log(`Express listening on port ${PORT}.`));
 
 // HTTP Server.
 const httpServer = http.createServer(server);
 
 // WebSocket Server.
-const webSocketServer = new SocketServer({ server: httpServer });
+const webSocketServer = new ws.Server({ server: httpServer });
 
 // Start listening.
-httpServer.listen(PORT, () => {
-  const { address, port } = httpServer.address();
-  console.log(`Listening on ${address}:${port}.`);
-});
+httpServer.listen(PORT);
 
 // Event Handlers.
-webSocketServer.on('connection', webSocket => {
-  console.log('Client connected');
-  webSocket.on('close', () => console.log('Client disconnected'));
+webSocketServer.on('connection', socket => {
+  socket.on('close', () => console.log('Client disconnected.'));
+
+  socket.on('message', data => {
+    const playerMessage = JSON.parse(data);
+    switch (playerMessage.type) {
+      case 'register':
+        players.push(new Player({
+          name: playerMessage.name,
+          socket,
+        }));
+
+        if (players.size === 2) {
+          playGame();
+        }
+      break;
+      case 'move':
+      break;
+    }
+  });
 });
 
-// Every second, send the date to all the connected clients.
-setInterval(() => {
-  webSocketServer.clients.forEach(client => {
-    client.send(new Date().toTimeString());
-  });
-}, 1000);
+const promptForMove = socket => {
+  socket.send(JSON.stringify({
+    type: 'makeMove',
+    gameState: game.state,
+  }));
+}
+
+const playGame = async () => {
+  game = new Game({ players });
+
+  while (!game.isOver) {
+    await 
+  }
+};
