@@ -29,9 +29,13 @@ httpServer.listen(PORT);
 
 // Event Handlers.
 webSocketServer.on('connection', socket => {
+  console.log('A client has connected.');
+
   socket.on('close', () => console.log('Client disconnected.'));
 
   socket.on('message', data => {
+    console.log(`Received a message: ${data}.`);
+
     const playerMessage = JSON.parse(data);
     switch (playerMessage.type) {
       case 'register':
