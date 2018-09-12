@@ -7,8 +7,9 @@
     "node": "8.11.1"
   },
   "scripts": {
-    "heroku:push": "git push heroku master",
+    "heroku:logs": "heroku logs --tail",
     "heroku:open": "heroku open",
+    "heroku:push": "git push heroku master",
     "start": "node --experimental-modules index.mjs"
   },
   "repository": {

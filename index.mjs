@@ -34,7 +34,6 @@ webSocketServer.on('connection', socket => {
   console.log('A client has connected.');
   socket.onmessage = message => console.log(`Received ${JSON.stringify(message)}.`);
   socket.onclose = printDisconnectMessage.bind(socket);
-  socket.prototype.sendJSON = json => this.send(JSON.stringify(json));
 
   // Wait for registration from this client (to get player name).
   //socket.onmessage = acceptRegistration.bind(socket);
@@ -92,10 +91,10 @@ const printDisconnectMessage = function () {
 }
 // const moveFrom = ({ player, state }) => {
 //   // Prompt for a move.
-//   player.socket.sendJSON({
+//   player.socket.send(JSON.stringify({
 //     type: 'makeMove',
 //     gameState: state,
-//   });
+//   }));
 
 //   // And listen for the response.
 //   player.socket.onmessage = listenForMove;
