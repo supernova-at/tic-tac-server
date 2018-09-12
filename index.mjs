@@ -1,18 +1,20 @@
 // Imports.
-import express from 'express';
 import http from 'http';
 import path from 'path';
+
+import express from 'express';
 import ws from 'ws';
 
-// import Game from './game.mjs';
+import Tournament from './tournament.mjs';
 import Player from './player.mjs';
 
 // Members.
 const PORT = process.env.PORT || 3000;
 const INDEX = path.join(process.cwd(), 'index.html');
-let game;
-let players = [];
-let viewerSocket;
+
+const players = [];
+// let tournament;
+// let viewerSocket;
 
 // Express Server.
 const server = express()
@@ -30,47 +32,105 @@ httpServer.listen(PORT);
 // Event Handlers.
 webSocketServer.on('connection', socket => {
   console.log('A client has connected.');
+  socket.onmessage = message => console.log(`Received ${message}.`);
+  socket.onclose = printDisconnectMessage.bind(socket);
+  socket.prototype.sendJSON = json => this.send(JSON.stringify(json));
 
-  socket.on('close', () => console.log('Client disconnected.'));
-
-  socket.on('message', data => {
-    console.log(`Received a message: ${data}.`);
-    updateViewer();
-
-    const playerMessage = JSON.parse(data);
-    switch (playerMessage.type) {
-      case 'register':
-        if (playerMessage === 'viewer') {
-          viewerSocket = socket;
-          return;
-        }
-
-        players.push(new Player({
-          name: playerMessage.name,
-          socket,
-        }));
-
-        // if (players.size === 2) {
-        //   playGame();
-        // }
-      break;
-      case 'move':
-      break;
-    }
-  });
+  // Wait for registration from this client (to get player name).
+  socket.onmessage = acceptRegistration.bind(socket);
 });
 
-const updateViewer = () => {
-  if (viewerSocket) {
-    viewerSocket.send(JSON.stringify({
-      numPlayers: players.length,
-    }));
+/*
+ * Helper Functions.
+ */
+const parse = data => JSON.parse(data);
+
+// Note: purposefully not a fat arrow function so we can bind it.
+const acceptRegistration = function (message) {
+  const socket = this;
+
+  const { type, name } = parse(message);
+  if (type === 'register') {
+    const player = new Player({
+      id: players.length,
+      name,
+      socket,
+    });
+
+    players.push(player);
+
+    console.log(`Team "${name}" has registered.`);
+    socket.removeEventListener('message', acceptRegistration);
+
+    // if (players === 8) {
+    //   tournament = 
+
+    //   while (tournament.isInProgress) {
+    //     const { activePlayer, state } = tournament.activeGame;
+    //     await moveFrom({ activePlayer, state });
+    //   }
+    // }
   }
 };
 
-// const promptForMove = socket => {
-//   socket.send(JSON.stringify({
+// const listenForMove = function (message) {
+//   const { type, name } = parse(message);
+// }
+
+const printDisconnectMessage = function () {
+  let playerName = 'unknown';
+
+  const socket = this;
+  const socketPlayer = players.find(player => {
+    return player.socket === socket;
+  });
+  if (socketPlayer) {
+    playerName = socketPlayer.name;
+  }
+
+  console.log(`"${playerName}" disconnected.`);
+}
+// const moveFrom = ({ player, state }) => {
+//   // Prompt for a move.
+//   player.socket.sendJSON({
 //     type: 'makeMove',
-//     gameState: game.state,
-//   }));
+//     gameState: state,
+//   });
+
+//   // And listen for the response.
+//   player.socket.onmessage = listenForMove;
 // };
+
+// const updateViewer = () => {
+//   if (viewerSocket) {
+//     viewerSocket.send(JSON.stringify({
+//       numPlayers: players.length,
+//     }));
+//   }
+// };
+
+// socket.on('message', data => {
+//   console.log(`Received a message: ${data}.`);
+//   updateViewer();
+
+//   const playerMessage = JSON.parse(data);
+//   switch (playerMessage.type) {
+//     case 'register':
+//       if (playerMessage === 'viewer') {
+//         viewerSocket = socket;
+//         return;
+//       }
+
+//       players.push(new Player({
+//         name: playerMessage.name,
+//         socket,
+//       }));
+
+//       // if (players.size === 2) {
+//       //   playGame();
+//       // }
+//     break;
+//     case 'move':
+//     break;
+//   }
+// });

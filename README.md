@@ -11,3 +11,4 @@ https://hidden-falls-43709.herokuapp.com/
 * https://github.com/websockets/ws
 * https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
 * http://untangled.io/immutable-js-an-introduction-with-examples-written-for-humans/
+* https://davidwalsh.name/es6-generators
