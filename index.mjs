@@ -46,38 +46,31 @@ const parse = data => JSON.parse(data);
 // Note: purposefully not a fat arrow function so we can bind it.
 const acceptRegistration = function (message) {
   console.log('Received a message. Checking if it is a registration message.');
-  console.log('Message is: %s', message);
-  console.log('Message keys are', Object.keys(message).join(','));
 
   const socket = this;
 
-  const { target, type, data } = message;
-  console.log('target', target);
-  console.log('type', type);
-  console.log('data', data);
+  const { type, name } = JSON.parse(message.data);
+  if (type === 'register') {
+    const player = new Player({
+      id: players.length,
+      name,
+      socket,
+    });
 
-  // const { type, name } = message.data;
-  // if (type === 'register') {
-  //   const player = new Player({
-  //     id: players.length,
-  //     name,
-  //     socket,
-  //   });
+    players.push(player);
 
-  //   players.push(player);
+    console.log(`Team "${name}" has registered.`);
+    socket.removeEventListener('message', acceptRegistration);
 
-  //   console.log(`Team "${name}" has registered.`);
-  //   socket.removeEventListener('message', acceptRegistration);
+    // if (players === 8) {
+    //   tournament = 
 
-  //   // if (players === 8) {
-  //   //   tournament = 
-
-  //   //   while (tournament.isInProgress) {
-  //   //     const { activePlayer, state } = tournament.activeGame;
-  //   //     await moveFrom({ activePlayer, state });
-  //   //   }
-  //   // }
-  // }
+    //   while (tournament.isInProgress) {
+    //     const { activePlayer, state } = tournament.activeGame;
+    //     await moveFrom({ activePlayer, state });
+    //   }
+    // }
+  }
 };
 
 // const listenForMove = function (message) {
