@@ -51,28 +51,33 @@ const acceptRegistration = function (message) {
 
   const socket = this;
 
-  const { type, name } = message.data;
-  if (type === 'register') {
-    const player = new Player({
-      id: players.length,
-      name,
-      socket,
-    });
+  const { target, type, data } = message;
+  console.log('target', target);
+  console.log('type', type);
+  console.log('data', data);
 
-    players.push(player);
+  // const { type, name } = message.data;
+  // if (type === 'register') {
+  //   const player = new Player({
+  //     id: players.length,
+  //     name,
+  //     socket,
+  //   });
 
-    console.log(`Team "${name}" has registered.`);
-    socket.removeEventListener('message', acceptRegistration);
+  //   players.push(player);
 
-    // if (players === 8) {
-    //   tournament = 
+  //   console.log(`Team "${name}" has registered.`);
+  //   socket.removeEventListener('message', acceptRegistration);
 
-    //   while (tournament.isInProgress) {
-    //     const { activePlayer, state } = tournament.activeGame;
-    //     await moveFrom({ activePlayer, state });
-    //   }
-    // }
-  }
+  //   // if (players === 8) {
+  //   //   tournament = 
+
+  //   //   while (tournament.isInProgress) {
+  //   //     const { activePlayer, state } = tournament.activeGame;
+  //   //     await moveFrom({ activePlayer, state });
+  //   //   }
+  //   // }
+  // }
 };
 
 // const listenForMove = function (message) {
