@@ -32,11 +32,10 @@ httpServer.listen(PORT);
 // Event Handlers.
 webSocketServer.on('connection', socket => {
   console.log('A client has connected.');
-  socket.onmessage = message => console.log(`Received ${JSON.stringify(message)}.`);
   socket.onclose = printDisconnectMessage.bind(socket);
 
   // Wait for registration from this client (to get player name).
-  //socket.onmessage = acceptRegistration.bind(socket);
+  socket.onmessage = acceptRegistration.bind(socket);
 });
 
 /*
