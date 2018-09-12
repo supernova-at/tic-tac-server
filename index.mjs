@@ -46,19 +46,10 @@ const parse = data => JSON.parse(data);
 // Note: purposefully not a fat arrow function so we can bind it.
 const acceptRegistration = function (message) {
   console.log('Received a message. Checking if it is a registration message.');
-  console.log(`The message is ${message}.`);
-
-  try {
-    const p = parse(message);
-    console.log('we could parse it. it is', p);
-  }
-  catch (err) {
-    console.log(`could not json parse it: ${err}.`);
-  }
 
   const socket = this;
 
-  const { type, name } = parse(message);
+  const { type, name } = message;
   if (type === 'register') {
     const player = new Player({
       id: players.length,
