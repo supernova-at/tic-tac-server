@@ -5,7 +5,7 @@ import path from 'path';
 import express from 'express';
 import ws from 'ws';
 
-import Tournament from './tournament.mjs';
+// import Tournament from './tournament.mjs';
 import Player from './player.mjs';
 
 // Members.
@@ -34,10 +34,10 @@ webSocketServer.on('connection', socket => {
   console.log('A client has connected.');
   socket.onmessage = message => console.log(`Received ${message}.`);
   socket.onclose = printDisconnectMessage.bind(socket);
-  socket.prototype.sendJSON = json => this.send(JSON.stringify(json));
+  //socket.prototype.sendJSON = json => this.send(JSON.stringify(json));
 
   // Wait for registration from this client (to get player name).
-  socket.onmessage = acceptRegistration.bind(socket);
+  //socket.onmessage = acceptRegistration.bind(socket);
 });
 
 /*

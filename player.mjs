@@ -4,7 +4,4 @@ export default class Player {
     this._name = name;
     this._socket = socket;
   }
-
-  async makeMove (boardState) {
-  }
 };
