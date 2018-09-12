@@ -32,10 +32,10 @@ httpServer.listen(PORT);
 // Event Handlers.
 webSocketServer.on('connection', socket => {
   console.log('A client has connected.');
-  socket.onclose = printDisconnectMessage.bind(socket);
+  socket.onclose = printDisconnectMessage;
 
   // Wait for registration from this client (to get player name).
-  socket.onmessage = acceptRegistration.bind(socket);
+  socket.onmessage = acceptRegistration;
 });
 
 /*
@@ -44,12 +44,11 @@ webSocketServer.on('connection', socket => {
 const parse = data => JSON.parse(data);
 
 // Note: purposefully not a fat arrow function so we can bind it.
-const acceptRegistration = function (message) {
+const acceptRegistration = message => {
   console.log('Received a message. Checking if it is a registration message.');
 
-  const socket = this;
-
   const { type, name } = JSON.parse(message.data);
+  const socket = message.target;
   if (type === 'register') {
     const player = new Player({
       id: players.length,
@@ -77,10 +76,10 @@ const acceptRegistration = function (message) {
 //   const { type, name } = parse(message);
 // }
 
-const printDisconnectMessage = function () {
+const printDisconnectMessage = event => {
   let playerName = 'unknown';
 
-  const socket = this;
+  const socket = event.target;
   const socketPlayer = players.find(player => {
     return player.socket === socket;
   });
