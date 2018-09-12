@@ -50,6 +50,8 @@ const acceptRegistration = function (message) {
   const socket = this;
 
   const { type, name } = message;
+  console.log('type', type);
+  console.log('name', name);
   if (type === 'register') {
     const player = new Player({
       id: players.length,
