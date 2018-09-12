@@ -48,9 +48,10 @@ const acceptRegistration = function (message) {
   console.log('Received a message. Checking if it is a registration message.');
   console.log('Message is: %s', message);
   console.log('Message keys are', Object.keys(message).join(','));
+
   const socket = this;
 
-  const { type, name } = message;
+  const { type, name } = message.data;
   if (type === 'register') {
     const player = new Player({
       id: players.length,
