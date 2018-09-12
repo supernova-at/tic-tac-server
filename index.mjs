@@ -1,8 +1,10 @@
 // Imports.
 import http from 'http';
 import path from 'path';
+import url from 'url';
 
 import express from 'express';
+import uuid from 'uuid';
 import ws from 'ws';
 
 // import Tournament from './tournament.mjs';
@@ -12,7 +14,7 @@ import Player from './player.mjs';
 const PORT = process.env.PORT || 3000;
 const INDEX = path.join(process.cwd(), 'index.html');
 
-const players = [];
+const ticTacClients = new Map(); // id -> { player, socket }
 // let tournament;
 // let viewerSocket;
 
@@ -31,19 +33,26 @@ httpServer.listen(PORT);
 
 // Event Handlers.
 webSocketServer.on('connection', socket => {
-  console.log('A client has connected.');
-  socket.onclose = printDisconnectMessage;
+  const { query: { player: name } } = url.parse(req.url, true);
+  console.log(`Team "${name}" has connected.`);
 
-  // Wait for registration from this client (to get player name).
-  socket.onmessage = acceptRegistration;
+  // Keep track of this player / socket.
+  const socketId = uuid.v4();
+  const player = new Player({ id, name });
+  socket.ticTacId = socketId;
+  ticTacClients.set(socketId, { player, socket });
+
+  // Clean up.
+  socket.onclose = () => {
+    const { player: { name } } = ticTacClients.get(socket.ticTacId);
+    console.log(`Team "${name}" has disconnected.`);
+    ticTacClients.delete(socket.ticTacId);
+  }
 });
 
 /*
  * Helper Functions.
  */
-const parse = data => JSON.parse(data);
-
-// Note: purposefully not a fat arrow function so we can bind it.
 const acceptRegistration = message => {
   console.log('Received a message. Checking if it is a registration message.');
 
@@ -59,7 +68,7 @@ const acceptRegistration = message => {
     players.push(player);
 
     console.log(`Team "${name}" has registered.`);
-    socket.removeEventListener('message', acceptRegistration);
+    //socket.removeEventListener('message', acceptRegistration);
 
     // if (players === 8) {
     //   tournament = 
@@ -76,19 +85,6 @@ const acceptRegistration = message => {
 //   const { type, name } = parse(message);
 // }
 
-const printDisconnectMessage = event => {
-  let playerName = 'unknown';
-
-  const socket = event.target;
-  const socketPlayer = players.find(player => {
-    return player.socket === socket;
-  });
-  if (socketPlayer) {
-    playerName = socketPlayer.name;
-  }
-
-  console.log(`"${playerName}" disconnected.`);
-}
 // const moveFrom = ({ player, state }) => {
 //   // Prompt for a move.
 //   player.socket.send(JSON.stringify({
