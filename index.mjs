@@ -32,13 +32,13 @@ const webSocketServer = new ws.Server({ server: httpServer });
 httpServer.listen(PORT);
 
 // Event Handlers.
-webSocketServer.on('connection', socket => {
-  const { query: { player: name } } = url.parse(req.url, true);
+webSocketServer.on('connection', (socket, request) => {
+  const { query: { player: name } } = url.parse(request.url, true);
   console.log(`Team "${name}" has connected.`);
 
   // Keep track of this player / socket.
   const socketId = uuid.v4();
-  const player = new Player({ id, name });
+  const player = new Player({ id: socketId, name });
   socket.ticTacId = socketId;
   ticTacClients.set(socketId, { player, socket });
   // const { type, name } = JSON.parse(message.data);
