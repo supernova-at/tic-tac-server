@@ -4,7 +4,7 @@ import path from 'path';
 import url from 'url';
 
 import express from 'express';
-import uuid from 'uuid';
+import uuid from 'node-uuid';
 import ws from 'ws';
 
 // import Tournament from './tournament.mjs';
@@ -41,91 +41,18 @@ webSocketServer.on('connection', socket => {
   const player = new Player({ id, name });
   socket.ticTacId = socketId;
   ticTacClients.set(socketId, { player, socket });
+  // const { type, name } = JSON.parse(message.data);
 
   // Clean up.
-  socket.onclose = () => {
-    const { player: { name } } = ticTacClients.get(socket.ticTacId);
-    console.log(`Team "${name}" has disconnected.`);
-    ticTacClients.delete(socket.ticTacId);
-  }
+  socket.onclose = printDisconnectMessage;
 });
 
 /*
  * Helper Functions.
  */
-const acceptRegistration = message => {
-  console.log('Received a message. Checking if it is a registration message.');
-
-  const { type, name } = JSON.parse(message.data);
-  const socket = message.target;
-  if (type === 'register') {
-    const player = new Player({
-      id: players.length,
-      name,
-      socket,
-    });
-
-    players.push(player);
-
-    console.log(`Team "${name}" has registered.`);
-    //socket.removeEventListener('message', acceptRegistration);
-
-    // if (players === 8) {
-    //   tournament = 
-
-    //   while (tournament.isInProgress) {
-    //     const { activePlayer, state } = tournament.activeGame;
-    //     await moveFrom({ activePlayer, state });
-    //   }
-    // }
-  }
-};
-
-// const listenForMove = function (message) {
-//   const { type, name } = parse(message);
-// }
-
-// const moveFrom = ({ player, state }) => {
-//   // Prompt for a move.
-//   player.socket.send(JSON.stringify({
-//     type: 'makeMove',
-//     gameState: state,
-//   }));
-
-//   // And listen for the response.
-//   player.socket.onmessage = listenForMove;
-// };
-
-// const updateViewer = () => {
-//   if (viewerSocket) {
-//     viewerSocket.send(JSON.stringify({
-//       numPlayers: players.length,
-//     }));
-//   }
-// };
-
-// socket.on('message', data => {
-//   console.log(`Received a message: ${data}.`);
-//   updateViewer();
-
-//   const playerMessage = JSON.parse(data);
-//   switch (playerMessage.type) {
-//     case 'register':
-//       if (playerMessage === 'viewer') {
-//         viewerSocket = socket;
-//         return;
-//       }
-
-//       players.push(new Player({
-//         name: playerMessage.name,
-//         socket,
-//       }));
-
-//       // if (players.size === 2) {
-//       //   playGame();
-//       // }
-//     break;
-//     case 'move':
-//     break;
-//   }
-// });
+const printDisconnectMessage = event => {
+  const socket = event.target;
+  const { player: { name } } = ticTacClients.get(socket.ticTacId);
+  console.log(`Team "${name}" has disconnected.`);
+  ticTacClients.delete(socket.ticTacId);
+}
