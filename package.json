@@ -10,7 +10,8 @@
     "heroku:logs": "heroku logs --tail",
     "heroku:open": "heroku open",
     "heroku:push": "git push heroku master",
-    "start": "node --experimental-modules index.mjs"
+    "start": "node --experimental-modules index.mjs",
+    "test": "node --experimental-modules test.mjs"
   },
   "repository": {
     "type": "git",

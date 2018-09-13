@@ -4,6 +4,6 @@ export default class Player {
     this._socketId = socketId;
   }
 
-  get name() { return this._name; }
-  get socketId() { return this._socketId; }
+  get name () { return this._name; }
+  get socketId () { return this._socketId; }
 };
