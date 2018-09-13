@@ -33,26 +33,25 @@ httpServer.listen(PORT);
 
 // Event Handlers.
 webSocketServer.on('connection', (socket, request) => {
-  const { query: { player: name } } = url.parse(request.url, true);
+  const { query } = url.parse(request.url, true);
+  const { name } = query;
   console.log(`Team "${name}" has connected.`);
 
-  // Keep track of this player / socket.
   const socketId = uuid.v4();
-  const player = new Player({ id: socketId, name });
-  socket.ticTacId = socketId;
+
+  // Keep track of this player / socket.
+  const player = new Player({ name, socketId });
   ticTacClients.set(socketId, { player, socket });
-  // const { type, name } = JSON.parse(message.data);
 
   // Clean up.
-  socket.onclose = printDisconnectMessage;
+  socket.onclose = event => {
+    const { player } = ticTacClients.get(socketId);
+    const { name } = player;
+    console.log(`Team "${name}" has disconnected.`);
+    ticTacClients.delete(socketId);
+  };
 });
 
 /*
  * Helper Functions.
  */
-const printDisconnectMessage = event => {
-  const socket = event.target;
-  const { player: { name } } = ticTacClients.get(socket.ticTacId);
-  console.log(`Team "${name}" has disconnected.`);
-  ticTacClients.delete(socket.ticTacId);
-}

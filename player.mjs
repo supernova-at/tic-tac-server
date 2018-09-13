@@ -4,4 +4,6 @@ export default class Player {
     this._name = name;
     this._socket = socket;
   }
+
+  get name() { return this._name; }
 };
