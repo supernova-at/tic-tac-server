@@ -7,9 +7,10 @@ import express from 'express';
 import uuid from 'node-uuid';
 import ws from 'ws';
 
-// import Tournament from './tournament.mjs';
 import Game from './game.mjs';
+import LeagueTable from './league-table.mjs';
 import Player from './player.mjs';
+import Tournament from './tournament.mjs';
 
 // Members.
 const MOVE_TIMEOUT = 3000; // milliseconds.
@@ -76,44 +77,41 @@ webSocketServer.on('connection', async (socket, request) => {
   if (ticTacClients.size === 2) {
     run();
   }
-
-  // Just for test, prompt this socket to make a move now.
-  // const move = await getMove(socket);
-  // console.log(`Team "${name}" made move: ${move}.`);
 });
 
 /*
  * Helper Functions.
  */
 const run = async () => {
-  const clients = ticTacClients.values();
-  const player1 = clients.next().value.player;
-  const player2 = clients.next().value.player;
-  //etc. until 8, then pass them all to tournament
+  // Create the tournament.
+  const playerList = [];
+  ticTacClients.forEach(value => playerList.push(value.player));
+  const tournament = Tournament(playerList);
+  const leagueTable = new LeagueTable(playerList);
 
-  const game = new Game(player1, player2); //tournament.activeGame
-  while (!game.isOver) {
-    const { activePlayer, gameState } = game;
-
-    const socket = getSocketById(activePlayer.socketId);
-    const move = await getMove(socket, gameState);
-    
-    if (move === TIMEOUT_MOVE) {
-      game.advanceTurn();
+  // Play all the games!
+  let { value: currentGame, done: isTournamentComplete } = tournament.next();
+  while (!isTournamentComplete) {
+    // Play the current game.
+    while (!currentGame.isOver) {
+      const { activePlayer, gameState } = currentGame;
+  
+      const socket = getSocketById(activePlayer.socketId);
+      const move = await getMove(socket, gameState);
+      
+      if (move === TIMEOUT_MOVE) {
+        currentGame.advanceTurn();
+      }
+      else {
+        currentGame.update(move); // note: also advances the turn.
+      }
     }
-    else {
-      game.update(move); // note: also advances the turn.
-    }
-  }
+  
+    // Update the league table.
+    leagueTable.update(currentGame.result);
 
-  // The game is over!
-  if (game.result === 'tie') {
-    // Update the league table.
-    console.log('GAME RESULT: tie');
-  }
-  else {
-    // Update the league table.
-    console.log(`GAME RESULT: Team "${game.result.name}" wins!`);
+    // This game has finished, move on to the next game.
+    ({ value: currentGame, done: isTournamentComplete} = tournament.next());
   }
 };
 

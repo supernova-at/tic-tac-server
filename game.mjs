@@ -34,11 +34,14 @@ export default class Game {
       return undefined;
     }
 
-    if (!this.winningPlayer) {
-      return 'tie';
-    }
+    // If we don't have a winner, it's a tie.
+    const isTie = !this.winningPlayer;
 
-    return this.winningPlayer;
+    return {
+      isTie,
+      winner: this.winningPlayer,
+      loser: (this.winningPlayer.socketId === this._player1.socketId) ? this._player2 : this._player1,
+    } 
   }
   get winnerMark () { return getWinnerMark(this._board); }
   get winningPlayer () {
