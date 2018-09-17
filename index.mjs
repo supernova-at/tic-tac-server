@@ -106,11 +106,12 @@ const run = async () => {
         currentGame.update(move); // note: also advances the turn.
       }
     }
-  
+
+    // The game is over!
     // Update the league table.
     leagueTable.update(currentGame.result);
 
-    // This game has finished, move on to the next game.
+    // And move on to the next game.
     ({ value: currentGame, done: isTournamentComplete} = tournament.next());
   }
 };

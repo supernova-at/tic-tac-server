@@ -10,6 +10,7 @@
     "heroku:logs": "heroku logs --tail",
     "heroku:open": "heroku open",
     "heroku:push": "git push heroku master",
+    "heroku:changes": "git add . && git commit --amend && git push -f heroku master",
     "start": "node --experimental-modules index.mjs",
     "test": "node --experimental-modules test.mjs"
   },

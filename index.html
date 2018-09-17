@@ -1,49 +1,202 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <title>Tic Tac Tournament</title>
+
+    <!-- Meta tags -->
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Tic Tac Viewer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <style>
-      #output {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-      }
 
-      #output p:nth-of-type(even) {
-        padding: 4px;
-        background-color: lightcyan;
+    <!-- React, React DOM, Babel, & Bootstrap CSS -->
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <style>
+      body {
+        background-color: whitesmoke;
+      }
+      .game-view {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-start;
       }
     </style>
 
-    <script>
-      const $output = document.getElementById('output');
+    <!-- React -->
+    <script type="text/babel">
+      // Keep references to DOM elements.
+      const game = document.getElementById('live-game');
+      const table = document.getElementById('live-league-table');
 
-      const host = location.origin.replace(/^http/, 'ws');
-      const socket = new WebSocket(host);
+      const LiveGame = ({ game }) => {
+        const { team1, team2, gameState } = game;
+        const styles = {
+          gridContainer: {
+            backgroundColor: 'slategray',
+            width: '695px',
+            height: '695px',
+          },
+          grid: {
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '10px 10px', // shorthand for grid-row-gap and grid-column-gap
+            placeItems: 'center', // shorthand for justify-items and align-items
+            justifyContent: 'center', // centers the grid within its container
+            alignContent: 'start', // positions the grid vertically within its container
+            width: '695px',
+            height: '695px',
+          },
+          gridItem: {
+            fontSize: '150px',
+            backgroundColor: 'whitesmoke', // match page background color
+            color: 'lightgray',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+          },
+          teams: {
+            display: 'flex',
+            justifyContent: 'space-between',
+          },
+          team: {
+            display: 'flex',
+            flexDirection: 'column',
+          },
+          team1: {
+            color: '#920A36',
+          },
+          team2: {
+            color: '#3D18AE',
+          },
+        };
 
-      socket.onopen = () => {
-        socket.send(JSON.stringify({
-          type: 'register',
-          name: 'viewer',
-        }));
+        const squares = gameState.map((gameSquare, index) => {
+          let value, finalStyle;
+          debugger;
+          if (gameSquare === '-') {
+            value = index;
+            finalStyle = styles.gridItem;
+          }
+          else if (gameSquare === team1.token) {
+            value = team1.token;
+            finalStyle = { ...styles.gridItem, ...styles.team1 };
+          }
+          else if (gameSquare === team2.token) {
+            value = team2.token;
+            finalStyle = { ...styles.gridItem, ...styles.team2 };
+          }
+          
+          return <div key={index} style={finalStyle}>{value}</div>;
+        });
+
+        return (
+          <div style={styles.container}>
+            <div style={styles.teams}>
+              <div style={styles.team}>
+                <h4 style={styles.team1}>{team1.name}</h4>
+                <p style={styles.team1} className="h1 text-center">{team1.token}</p>
+              </div>
+              <h4>vs.</h4>
+              <div style={styles.team}>
+                <h4 style={styles.team2}>{team2.name}</h4>
+                <p style={styles.team2} className="h1 text-center">{team2.token}</p>
+              </div>
+            </div>
+            <div style={styles.gridContainer}>
+              <div style={styles.grid}>
+                {squares}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      const LiveTable = ({ tableData }) => {
+        return (
+          <table>
+            <thead>
+              <tr>
+                <td>Team</td>
+                <td>Games Played</td>
+                <td>Wins</td>
+                <td>Losses</td>
+                <td>Ties</td>
+                <td>Points</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Sample Team Name</th>
+                <td>8</td>
+                <td>6</td>
+                <td>1</td>
+                <td>1</td>
+                <td>19</td>
+              </tr>
+            </tbody>
+          </table>
+        );
+      };
+
+      function updateGame (gameInfo) {
+        ReactDOM.render(<LiveGame game={gameInfo} />, game);
+      }
+      function updateTable (tableData) {
+        ReactDOM.render(<LiveTable tableData={tableData} />, table);
       }
 
+      const team1 = { name: 'Team 1 Name TBD', token: 'X' };
+      const team2 = { name: 'Team 2 Name TBD', token: 'O' };
+      const gameState = ['-','X','-','-','O','-','X','O','-',];
+      updateGame({ team1, team2, gameState });
+    </script>
+
+    <!-- Web Socket communication -->
+    <script>
+      // Connect to the Web Socket server.
+      const host = location.origin.replace(/^http/, 'ws');
+      const socket = new WebSocket(host + '?name=viewer');
+
+      // Handle messages from the server.
       socket.onmessage = (event) => {
-        console.log(`Received ${event}.`);
-        const p = document.createElement('p');
-        p.innerText = event.data;
-        $output.insertBefore(p, $output.firstChild);
+        const message = JSON.parse(event.data);
+        console.log(`Received ${message}`);
+
+        // updateGame(gameState);
+        // updateTable(tableData);
       }
     </script>
   </head>
   <body>
-    <h2>Received Messages</h2>
-    <div id="output" style="border: dashed 1px darkorange">
+    <div class="container-fluid">
+      <div class="jumbotron">
+        <h1>Tic Tac Tournament</h1>
+        <p class="lead">Welcome to the Tic Tac Tournament!</p>
+      </div>
+
+      <div>
+        <div class="game-view">
+          <div>
+            <h3>Active Game</h3>
+            <div id="live-game"></div>
+          </div>
+          <div>
+            <h3>Live League Table</h3>
+            <div id="live-league-table"></div>
+          </div>
+        </div>
+
+        <h3>Rules <small>How to Play</small></h3>
+        <ul class="list-group">
+          <li>TBD</li>
+          <li>TBD</li>
+          <li>TBD</li>
+        </ul>
+      </div>
     </div>
   </body>
 </html>
