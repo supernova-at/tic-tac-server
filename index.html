@@ -23,6 +23,23 @@
         justify-content: space-around;
         align-items: flex-start;
       }
+      .game-result {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 300px;
+
+        color: palegreen;
+        text-shadow: 1px 1px 2px black, 0 0 25px forestgreen, 0 0 5px darkgreen;
+        transform: rotateZ(15deg);
+
+        position: absolute;
+        left: 50%;
+        top: 50%;
+      }
+      .relative {
+        position: relative;
+      }
     </style>
 
     <!-- React -->
@@ -76,7 +93,6 @@
 
         const squares = gameState.map((gameSquare, index) => {
           let value, finalStyle;
-          debugger;
           if (gameSquare === '-') {
             value = index;
             finalStyle = styles.gridItem;
@@ -151,12 +167,14 @@
 
       const team1 = { name: 'Team 1 Name TBD', token: 'X' };
       const team2 = { name: 'Team 2 Name TBD', token: 'O' };
-      const gameState = ['-','X','-','-','O','-','X','O','-',];
+      const gameState = ['-','-','-','-','-','-','-','-','-',];
       updateGame({ team1, team2, gameState });
     </script>
 
     <!-- Web Socket communication -->
     <script>
+      window.gameQueue = [];
+
       // Connect to the Web Socket server.
       const host = location.origin.replace(/^http/, 'ws');
       const socket = new WebSocket(host + '?name=viewer');
@@ -164,11 +182,30 @@
       // Handle messages from the server.
       socket.onmessage = (event) => {
         const message = JSON.parse(event.data);
-        console.log(`Received ${message}`);
 
-        // updateGame(gameState);
+        if (message.type === 'gameUpdate') {
+          const gameQueueCopy = [...window.gameQueue];
+          gameQueueCopy.push(message.gameInfo);
+          window.gameQueue = gameQueueCopy;
+        }
+        else if (message.type === 'gameResult') {
+          let display = message.result.isTie ? 'Tie' : `${message.result.winner.name} wins!`;
+        }
         // updateTable(tableData);
       }
+    </script>
+
+    <!-- Show Runner -->
+    <script>
+      window.gameQueueInterval = setInterval(() => {
+        if (window.gameQueue.length === 0) { return; }
+
+        const gameQueueCopy = [...window.gameQueue];
+        const nextUpdate = gameQueueCopy.shift();
+        window.gameQueue = gameQueueCopy;
+
+        updateGame(nextUpdate);
+      }, 850);
     </script>
   </head>
   <body>
@@ -180,9 +217,10 @@
 
       <div>
         <div class="game-view">
-          <div>
+          <div class="relative">
             <h3>Active Game</h3>
             <div id="live-game"></div>
+            <h1 class="game-result"></h1>
           </div>
           <div>
             <h3>Live League Table</h3>

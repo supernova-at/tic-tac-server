@@ -29,6 +29,8 @@ export default class Game {
   get activePlayer () { return this._isP1sTurn ? this._player1 : this._player2; }
   get gameState () { return this._board; }
   get isOver() { return getWinnerMark(this._board) || isFull(this._board); }
+  get player1() { return { team: this._player1, token: this._playersToMarks.get(this._player1) }; }
+  get player2() { return { team: this._player2, token: this._playersToMarks.get(this._player2) }; }
   get result () {
     if (!this.isOver) {
       return undefined;

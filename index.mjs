@@ -20,8 +20,7 @@ const INDEX = path.join(process.cwd(), 'index.html');
 
 const ticTacClients = new Map(); // id -> { player, socket }
 let resolvePlayerMove;
-// let tournament;
-// let viewerSocket;
+let viewerSocket;
 
 // Express Server.
 const server = express()
@@ -40,9 +39,13 @@ httpServer.listen(PORT);
 webSocketServer.on('connection', async (socket, request) => {
   const { query } = url.parse(request.url, true);
   const { name } = query;
-  console.log(`Team "${name}" has connected.`);
+  if (name === 'viewer') {
+    console.log('The tournament viewer has connected.');
+    viewerSocket = socket;
+    return;
+  }
 
-  // Keep track of this player / socket.
+  console.log(`Team "${name}" has connected.`);
   const socketId = uuid.v4();
   const player = new Player({ name, socketId });
   ticTacClients.set(socketId, { player, socket });
@@ -67,6 +70,7 @@ webSocketServer.on('connection', async (socket, request) => {
     const name = getPlayerNameBySocketId(socketId);
     console.log(`Team "${name}" has disconnected.`);
 
+    // TODO: don't delete, just check socket state.
     ticTacClients.delete(socketId);
   };
 
@@ -94,8 +98,8 @@ const run = async () => {
   while (!isTournamentComplete) {
     // Play the current game.
     while (!currentGame.isOver) {
-      const { activePlayer, gameState } = currentGame;
-  
+      const { activePlayer, player1, player2, gameState } = currentGame;
+
       const socket = getSocketById(activePlayer.socketId);
       const move = await getMove(socket, gameState);
       
@@ -105,15 +109,47 @@ const run = async () => {
       else {
         currentGame.update(move); // note: also advances the turn.
       }
+
+      updateUIGame({
+        team1: { name: player1.team.name, token: player1.token },
+        team2: { name: player2.team.name, token: player2.token },
+        gameState: currentGame.gameState,
+      });
     }
 
     // The game is over!
+
+    // Send a "winner" message.
+    updateUIGameResult(currentGame.result);
+
     // Update the league table.
     leagueTable.update(currentGame.result);
 
     // And move on to the next game.
     ({ value: currentGame, done: isTournamentComplete} = tournament.next());
   }
+};
+
+const updateUIGame = gameInfo => {
+  if (!viewerSocket) { return; }
+
+  viewerSocket.send(JSON.stringify({
+    type: 'gameUpdate',
+    gameInfo,
+  }));
+};
+
+const updateUITable = tableInfo => {
+
+};
+
+const updateUIGameResult = result => {
+  if (!viewerSocket) { return; }
+
+  viewerSocket.send(JSON.stringify({
+    type: 'gameResult',
+    result,
+  }));
 };
 
 const getMove = (socket, gameState) => {
