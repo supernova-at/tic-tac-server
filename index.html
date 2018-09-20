@@ -24,18 +24,19 @@
         align-items: flex-start;
       }
       .game-result {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        max-width: 300px;
-
+        font-size: 72px;
+        text-transform: capitalize;
         color: palegreen;
         text-shadow: 1px 1px 2px black, 0 0 25px forestgreen, 0 0 5px darkgreen;
-        transform: rotateZ(15deg);
+        text-align: center;
+        visibility: hidden;
 
         position: absolute;
         left: 50%;
         top: 50%;
+        width: 100%;
+        margin: auto;
+        transform: translateX(-50%) rotateZ(-15deg);        
       }
       .relative {
         position: relative;
@@ -47,6 +48,7 @@
       // Keep references to DOM elements.
       const game = document.getElementById('live-game');
       const table = document.getElementById('live-league-table');
+      const winnerEl = document.querySelector('.game-result');
 
       const LiveGame = ({ game }) => {
         const { team1, team2, gameState } = game;
@@ -78,10 +80,43 @@
           teams: {
             display: 'flex',
             justifyContent: 'space-between',
+            marginBottom: '15px',
           },
-          team: {
+          team1Container: {
             display: 'flex',
             flexDirection: 'column',
+            alignItems: 'center',
+            padding: '10px',
+            border: 'solid 3px #920A36',
+            borderRadius: '0px 0px 10px 10px',
+            boxShadow: '-5px 5px silver',
+            zIndex: '1',
+            width: '45%',
+          },
+          team2Container: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '10px',
+            border: 'solid 3px #3D18AE',
+            borderRadius: '0px 0px 10px 10px',
+            boxShadow: '5px 5px silver',
+            zIndex: '1',
+            width: '45%',
+          },
+          team1Name: {
+            color: '#920A36',
+            width: '100%',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          },
+          team2Name: {
+            color: '#3D18AE',
+            width: '100%',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           },
           team1: {
             color: '#920A36',
@@ -112,13 +147,13 @@
         return (
           <div style={styles.container}>
             <div style={styles.teams}>
-              <div style={styles.team}>
-                <h4 style={styles.team1}>{team1.name}</h4>
+              <div style={styles.team1Container}>
+                <h4 style={styles.team1Name}>{team1.name}</h4>
                 <p style={styles.team1} className="h1 text-center">{team1.token}</p>
               </div>
-              <h4>vs.</h4>
-              <div style={styles.team}>
-                <h4 style={styles.team2}>{team2.name}</h4>
+              <h4 style={{ alignSelf: 'center' }}>vs.</h4>
+              <div style={styles.team2Container}>
+                <h4 style={styles.team2Name}>{team2.name}</h4>
                 <p style={styles.team2} className="h1 text-center">{team2.token}</p>
               </div>
             </div>
@@ -131,28 +166,72 @@
         );
       };
 
-      const LiveTable = ({ tableData }) => {
+      const LiveTable = ({ tableInfo }) => {
+        const styles = {
+          table: {
+            border: 'solid 1px silver',
+            borderCollapse: 'collapse',
+            borderSpacing: '0',
+            width: '600px',
+          },
+          rowEven: {
+            backgroundColor: 'whitesmoke',
+            borderCollapse: 'collapse',
+          },
+          rowOdd: {
+            backgroundColor: 'lightgray',
+            borderCollapse: 'collapse',
+          },
+          cell: {
+            padding: '10px',
+            color: '#111',
+            textAlign: 'center',
+            border: 'solid 1px #ddd'
+          },
+          header: {
+            backgroundColor: 'slateblue',
+            color: 'whitesmoke',
+            border: '1px solid #ddd',
+          },
+          headerRow: {
+            padding: '10px',
+          },
+          headerCell: {
+            padding: '10px',
+            textAlign: 'center',
+          },
+        };
+
+        const rows = tableInfo
+          .sort((a, b) => a.points < b.points)
+          .map((row, index) => {
+            const rowClass = (index % 2 === 0) ? styles.rowEven : styles.rowOdd;
+            return (
+              <tr key={index} style={rowClass}>
+                <th scope="row" style={styles.cell}>{row.name}</th>
+                <td style={styles.cell}>{row.gamesPlayed}</td>
+                <td style={styles.cell}>{row.wins}</td>
+                <td style={styles.cell}>{row.losses}</td>
+                <td style={styles.cell}>{row.ties}</td>
+                <td style={styles.cell}>{row.points}</td>
+              </tr>
+            );
+          });
+
         return (
-          <table>
-            <thead>
+          <table style={styles.table}>
+            <thead style={styles.header}>
               <tr>
-                <td>Team</td>
-                <td>Games Played</td>
-                <td>Wins</td>
-                <td>Losses</td>
-                <td>Ties</td>
-                <td>Points</td>
+                <td style={styles.headerCell}>Team</td>
+                <td style={styles.headerCell}>Games Played</td>
+                <td style={styles.headerCell}>Wins</td>
+                <td style={styles.headerCell}>Losses</td>
+                <td style={styles.headerCell}>Ties</td>
+                <td style={styles.headerCell}>Points</td>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <th scope="row">Sample Team Name</th>
-                <td>8</td>
-                <td>6</td>
-                <td>1</td>
-                <td>1</td>
-                <td>19</td>
-              </tr>
+              {rows}
             </tbody>
           </table>
         );
@@ -161,8 +240,8 @@
       function updateGame (gameInfo) {
         ReactDOM.render(<LiveGame game={gameInfo} />, game);
       }
-      function updateTable (tableData) {
-        ReactDOM.render(<LiveTable tableData={tableData} />, table);
+      function updateTable (tableInfo) {
+        ReactDOM.render(<LiveTable tableInfo={tableInfo} />, table);
       }
 
       const team1 = { name: 'Team 1 Name TBD', token: 'X' };
@@ -173,7 +252,7 @@
 
     <!-- Web Socket communication -->
     <script>
-      window.gameQueue = [];
+      window.ticTacQueue = [];
 
       // Connect to the Web Socket server.
       const host = location.origin.replace(/^http/, 'ws');
@@ -183,29 +262,37 @@
       socket.onmessage = (event) => {
         const message = JSON.parse(event.data);
 
-        if (message.type === 'gameUpdate') {
-          const gameQueueCopy = [...window.gameQueue];
-          gameQueueCopy.push(message.gameInfo);
-          window.gameQueue = gameQueueCopy;
-        }
-        else if (message.type === 'gameResult') {
-          let display = message.result.isTie ? 'Tie' : `${message.result.winner.name} wins!`;
-        }
-        // updateTable(tableData);
+        // Add this message to the queue, handle it in the show runner.
+        const queue = [...window.ticTacQueue];
+        queue.push(message);
+        window.ticTacQueue = queue;
       }
     </script>
 
     <!-- Show Runner -->
     <script>
-      window.gameQueueInterval = setInterval(() => {
-        if (window.gameQueue.length === 0) { return; }
+      window.ticTacQueueInterval = setInterval(() => {
+        if (window.ticTacQueue.length === 0) { return; }
+        winnerEl.style.visibility = 'hidden';
 
-        const gameQueueCopy = [...window.gameQueue];
-        const nextUpdate = gameQueueCopy.shift();
-        window.gameQueue = gameQueueCopy;
+        const queue = [...window.ticTacQueue];
+        const update = queue.shift();
+        window.ticTacQueue = queue;
 
-        updateGame(nextUpdate);
-      }, 850);
+        switch (update.type) {
+          case 'gameUpdate':
+            updateGame(update.gameInfo);
+          break;
+          case 'gameResult':
+            let display = update.result.isTie ? 'Tie' : `${update.result.winner.substring(0, 25)} wins!`;
+            winnerEl.innerText = display;
+            winnerEl.style.visibility = 'visible';
+          break;
+          case 'tableUpdate':
+            updateTable(update.tableInfo);
+          break;
+        }        
+      }, 500); //1500
     </script>
   </head>
   <body>
@@ -223,7 +310,7 @@
             <h1 class="game-result"></h1>
           </div>
           <div>
-            <h3>Live League Table</h3>
+            <h3>League Table</h3>
             <div id="live-league-table"></div>
           </div>
         </div>

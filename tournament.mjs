@@ -17,8 +17,18 @@ export default function * Tournament (players) {
     });
   });
 
+  // Shuffle the games.
+  const numGames = games.length;
+  const shuffledGames = [];
+  while (shuffledGames.length < numGames) {
+    // Pick a random game and move it to the new array.
+    const randomIndex = Math.floor(Math.random() * games.length);
+    const randomGame = games.splice(randomIndex, 1)[0];
+    shuffledGames.push(randomGame);
+  }
+
   // Yield the next game.
-  for (let i = 0; i < games.length; i++) {
+  for (let i = 0; i < shuffledGames.length; i++) {
     yield games[i];
   }
 }

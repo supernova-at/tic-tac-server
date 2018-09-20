@@ -69,16 +69,13 @@ webSocketServer.on('connection', async (socket, request) => {
   socket.onclose = () => {
     const name = getPlayerNameBySocketId(socketId);
     console.log(`Team "${name}" has disconnected.`);
-
-    // TODO: don't delete, just check socket state.
-    ticTacClients.delete(socketId);
   };
 
   /*
    *  Logic start.
    */
   // Don't start until we have enough players.
-  if (ticTacClients.size === 2) {
+  if (ticTacClients.size === 8) {
     run();
   }
 });
@@ -92,6 +89,7 @@ const run = async () => {
   ticTacClients.forEach(value => playerList.push(value.player));
   const tournament = Tournament(playerList);
   const leagueTable = new LeagueTable(playerList);
+  updateUITable(leagueTable.values);
 
   // Play all the games!
   let { value: currentGame, done: isTournamentComplete } = tournament.next();
@@ -103,11 +101,12 @@ const run = async () => {
       const socket = getSocketById(activePlayer.socketId);
       const move = await getMove(socket, gameState);
       
-      if (move === TIMEOUT_MOVE) {
-        currentGame.advanceTurn();
+      if (move !== TIMEOUT_MOVE) {
+        currentGame.update(move); // note: also advances the turn.
       }
       else {
-        currentGame.update(move); // note: also advances the turn.
+        // Timed out.
+        currentGame.advanceTurn();
       }
 
       updateUIGame({
@@ -124,6 +123,7 @@ const run = async () => {
 
     // Update the league table.
     leagueTable.update(currentGame.result);
+    updateUITable(leagueTable.values);
 
     // And move on to the next game.
     ({ value: currentGame, done: isTournamentComplete} = tournament.next());
@@ -140,24 +140,36 @@ const updateUIGame = gameInfo => {
 };
 
 const updateUITable = tableInfo => {
+  if (!viewerSocket) { return; }
 
+  viewerSocket.send(JSON.stringify({
+    type: 'tableUpdate',
+    tableInfo,
+  }));
 };
 
 const updateUIGameResult = result => {
   if (!viewerSocket) { return; }
 
+  const gameResult = {
+    isTie: result.isTie,
+    winner: result.winner.name,
+    loser: result.loser.name,
+  };
   viewerSocket.send(JSON.stringify({
     type: 'gameResult',
-    result,
+    result: gameResult,
   }));
 };
 
 const getMove = (socket, gameState) => {
-  // Prompt.
-  socket.send(JSON.stringify({
-    type: 'makeMove',
-    gameState,
-  }));
+  if (socket.readyState === 1) { // Open
+    // Prompt.
+    socket.send(JSON.stringify({
+      type: 'makeMove',
+      gameState,
+    }));
+  }
 
   // Wait for response.
   const playerMove = new Promise((resolve, reject) => {
