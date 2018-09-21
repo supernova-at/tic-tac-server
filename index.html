@@ -80,29 +80,31 @@
           teams: {
             display: 'flex',
             justifyContent: 'space-between',
-            marginBottom: '15px',
+            marginBottom: '25px',
           },
           team1Container: {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             padding: '10px',
-            border: 'solid 3px #920A36',
             borderRadius: '0px 0px 10px 10px',
             boxShadow: '-5px 5px silver',
             zIndex: '1',
             width: '45%',
+            backgroundColor: '#920A36',
+            color: 'whitesmoke',
           },
           team2Container: {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             padding: '10px',
-            border: 'solid 3px #3D18AE',
             borderRadius: '0px 0px 10px 10px',
             boxShadow: '5px 5px silver',
             zIndex: '1',
             width: '45%',
+            backgroundColor: '#3D18AE',
+            color: 'whitesmoke',
           },
           team1Name: {
             color: '#920A36',
@@ -151,7 +153,7 @@
                 <h4 style={styles.team1Name}>{team1.name}</h4>
                 <p style={styles.team1} className="h1 text-center">{team1.token}</p>
               </div>
-              <h4 style={{ alignSelf: 'center' }}>vs.</h4>
+              <h2 style={{ alignSelf: 'center' }}>vs.</h2>
               <div style={styles.team2Container}>
                 <h4 style={styles.team2Name}>{team2.name}</h4>
                 <p style={styles.team2} className="h1 text-center">{team2.token}</p>
@@ -189,7 +191,7 @@
             border: 'solid 1px #ddd'
           },
           header: {
-            backgroundColor: 'slateblue',
+            backgroundColor: 'lightseagreen',
             color: 'whitesmoke',
             border: '1px solid #ddd',
           },
@@ -314,13 +316,6 @@
             <div id="live-league-table"></div>
           </div>
         </div>
-
-        <h3>Rules <small>How to Play</small></h3>
-        <ul class="list-group">
-          <li>TBD</li>
-          <li>TBD</li>
-          <li>TBD</li>
-        </ul>
       </div>
     </div>
   </body>

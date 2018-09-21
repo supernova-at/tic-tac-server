@@ -13,7 +13,9 @@ import Player from './player.mjs';
 import Tournament from './tournament.mjs';
 
 // Members.
+const NUM_TEAMS = 4;
 const MOVE_TIMEOUT = 3000; // milliseconds.
+
 const TIMEOUT_MOVE = 'TIMEOUT';
 const PORT = process.env.PORT || 3000;
 const INDEX = path.join(process.cwd(), 'index.html');
@@ -75,7 +77,7 @@ webSocketServer.on('connection', async (socket, request) => {
    *  Logic start.
    */
   // Don't start until we have enough players.
-  if (ticTacClients.size === 8) {
+  if (ticTacClients.size === NUM_TEAMS) {
     run();
   }
 });

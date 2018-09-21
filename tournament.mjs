@@ -29,6 +29,6 @@ export default function * Tournament (players) {
 
   // Yield the next game.
   for (let i = 0; i < shuffledGames.length; i++) {
-    yield games[i];
+    yield shuffledGames[i];
   }
 }
